@@ -4,13 +4,14 @@ package Items;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 public class TestClass {
 
     private String className;
     private String classPackage;
-    private Map<String,String> parameters = new HashMap<String, String>();
+    private Map<String, String> parameters = new HashMap<>();
     private Map<String, TestMethodObject> methodMap = new HashMap<>();
 
     public TestClass(String canonicalClassName) {

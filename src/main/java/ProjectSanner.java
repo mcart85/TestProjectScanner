@@ -1,4 +1,3 @@
-
 import Items.TestClass;
 import Items.TestMethodObject;
 import Items.TestProjectMap;
@@ -7,7 +6,8 @@ import org.testng.annotations.Test;
 import java.io.File;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ProjectSanner {
     int methodId = 1000;
@@ -16,9 +16,7 @@ public class ProjectSanner {
 
     public void scanProject(String pathToProject) {
         pathToProject = verifyPath(pathToProject);
-
         TestClassLoader loader = new TestClassLoader(pathToProject, ClassLoader.getSystemClassLoader());
-
         List<File> fileList = scanFolderRecursive(new ArrayList<File>(), new File(pathToProject));
 
         for (File file : fileList) {
@@ -28,6 +26,9 @@ public class ProjectSanner {
                     String className = "" + fileName.split(".class")[0];
                     loader.setPathToClass(file.getParentFile().getAbsolutePath() + File.separator);
                     Class clazz = loader.loadClass(className);
+                    if (clazz.isInterface()) {
+                        continue;
+                    }
                     TestClass testClass = new TestClass(clazz.getCanonicalName());
                     Method[] methods = clazz.getDeclaredMethods();
 
