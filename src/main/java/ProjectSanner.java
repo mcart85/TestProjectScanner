@@ -14,6 +14,28 @@ public class ProjectSanner {
     public TestProjectMap projectMap = new TestProjectMap();
 
 
+    static List<File> scanFolderRecursive(List<File> fileList, File file) {
+        if (file.isFile()) {
+            String absolutePath = file.getAbsolutePath();
+            if (absolutePath.contains("target") && absolutePath.contains("class")) {
+                fileList.add(file);
+            }
+        } else {
+            File[] fileArray = file.listFiles();
+            for (File fileItem : fileArray) {
+                scanFolderRecursive(fileList, fileItem);
+            }
+        }
+        return fileList;
+    }
+
+    public String verifyPath(String path) {
+        String separator = "\\";
+        path = path.replace(separator, File.separator);
+        path = (path.endsWith(File.separator)) ? path : path + File.separator;
+        return path;
+    }
+
     public void scanProject(String pathToProject) {
         pathToProject = verifyPath(pathToProject);
         TestClassLoader loader = new TestClassLoader(pathToProject, ClassLoader.getSystemClassLoader());
@@ -30,47 +52,31 @@ public class ProjectSanner {
                         continue;
                     }
                     TestClass testClass = new TestClass(clazz.getCanonicalName());
-                    Method[] methods = clazz.getDeclaredMethods();
+                    try {
+                        Method[] methods = clazz.getMethods();
 
-                    for (Method method : methods) {
-                        if (method.isAnnotationPresent(org.testng.annotations.Test.class)) {
-                            projectMap.getClassList().put(clazz.getCanonicalName(), testClass);
-                            TestMethodObject methodItem = new TestMethodObject(method.getName(), testClass, generate());
-                            Annotation annotation = method.getAnnotation(org.testng.annotations.Test.class);
-                            methodItem.setTestName(((Test) annotation).testName());
-                            methodItem.setDescription(((Test) annotation).description());
-                            methodItem.setDependencies(((Test) annotation).dependsOnMethods());
-                            if (method.isAnnotationPresent(org.testng.annotations.Parameters.class)) {
-                                methodItem.setParameterNames(method.getAnnotation(org.testng.annotations.Parameters.class).value());
+                        for (Method method : methods) {
+                            if (method.isAnnotationPresent(org.testng.annotations.Test.class)) {
+                                projectMap.getClassList().put(clazz.getCanonicalName(), testClass);
+                                TestMethodObject methodItem = new TestMethodObject(method.getName(), testClass, generate());
+                                Annotation annotation = method.getAnnotation(org.testng.annotations.Test.class);
+                                methodItem.setTestName(((Test) annotation).testName());
+                                methodItem.setDescription(((Test) annotation).description());
+                                methodItem.setDependencies(((Test) annotation).dependsOnMethods());
+                                if (method.isAnnotationPresent(org.testng.annotations.Parameters.class)) {
+                                    methodItem.setParameterNames(method.getAnnotation(org.testng.annotations.Parameters.class).value());
+                                }
                             }
                         }
+                    } catch (NoClassDefFoundError e) {
+                        //   System.out.println(e);
                     }
                 } catch (Exception e) {
-                    System.err.println(e);
+                    //    System.err.println(e);
+                    e.printStackTrace();
                 }
             }
         }
-    }
-
-    public String verifyPath(String path) {
-        String separator = "\\";
-        path = path.replace(separator, File.separator);
-        path = (path.endsWith(File.separator)) ? path : path + File.separator;
-        return path;
-    }
-
-    static List<File> scanFolderRecursive(List<File> fileList, File file) {
-        if (file.isFile()) {
-            if (file.getAbsolutePath().contains("target" + File.separator + "test-classes")) {
-                fileList.add(file);
-            }
-        } else {
-            File[] fileArray = file.listFiles();
-            for (File fileItem : fileArray) {
-                scanFolderRecursive(fileList, fileItem);
-            }
-        }
-        return fileList;
     }
 
     public int generate() {

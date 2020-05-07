@@ -1,8 +1,4 @@
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 
 public class TestClassLoader extends ClassLoader {
     private String pathtobin;
@@ -18,7 +14,7 @@ public class TestClassLoader extends ClassLoader {
     }
 
     private String getFullClassName(String className) {
-         String classPath = pathtobin.split( "test-classes")[1];
+        String classPath = pathtobin.split("classes")[1];
         if (classPath != "\\") {
             //In case if class not in the package
             classPath = classPath.substring(1).replace(File.separator, ".");

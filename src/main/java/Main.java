@@ -2,7 +2,8 @@ public class Main {
 
     public static void main(String[] args) {
         ProjectSanner scanner = new ProjectSanner();
-        scanner.scanProject(args[0]);
+        String path = "C:\\Users\\DELL\\Desktop\\Interview Task\\PostCodesApp";
+        scanner.scanProject(path);
         System.out.println(scanner.projectMap.toJsonString());
     }
 }
